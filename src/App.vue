@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
+import { ref } from 'vue'
 import axios from 'axios'
 
 type User = {
@@ -56,12 +57,13 @@ const userInfo = reactive<User>({
   avatarUrl: '',
   htmlUrl: ''
 })
-const userId = 'eityamo'
 
-const fetchUserInfo = (): void => {
+const userId = ref('eityamo')
+
+const fetchUserInfo = (userId: string): void => {
   axios.get<Response>(`https://api.github.com/users/${userId}`)
   .then(( response ) => {
-    const {name, login, location, public_repos, avatar_url, html_url} = response.data
+    const { name, login, location, public_repos, avatar_url, html_url } = response.data
     userInfo.name = name
     userInfo.login = login
     userInfo.location = location
@@ -74,11 +76,13 @@ const fetchUserInfo = (): void => {
 </script>
 
 <template>
-  <h2>GitHub User Info</h2>
-  <button @click="fetchUserInfo">Get user info</button>
-  <!-- 整形したHTMLの挿入先 -->
-  <div id="result">
-    <h4>{{ userInfo.name }} @{{ userInfo.login }}</h4>
+  <h2>Github情報を取得</h2>
+  <h3>ログイン名を入力</h3>
+  <input v-model="userId" />
+  <button @click="fetchUserInfo(userId)">取得</button>
+  <div>
+    <h4>{{ userInfo.name }}</h4>
+    <h4>{{ userInfo.login }}</h4>
     <img :src="userInfo.avatarUrl" :alt="userInfo.login" height="100">
     <dl>
       <dt>Location</dt>
