@@ -59,8 +59,10 @@ const userInfo = reactive<User>({
 })
 
 const userId = ref('eityamo')
+const status = ref<'loading' | 'normal' | 'unknown'>('normal')
 
 const fetchUserInfo = (userId: string): void => {
+  status.value = 'loading'
   axios.get<Response>(`https://api.github.com/users/${userId}`)
   .then(( response ) => {
     const { name, login, location, public_repos, avatar_url, html_url } = response.data
@@ -70,6 +72,10 @@ const fetchUserInfo = (userId: string): void => {
     userInfo.publicRepos = public_repos
     userInfo.avatarUrl = avatar_url
     userInfo.htmlUrl = html_url
+
+    status.value = 'normal'
+  }).catch(error => {
+    status.value = 'unknown'
   })
 }
 
@@ -80,7 +86,13 @@ const fetchUserInfo = (userId: string): void => {
   <h3>ログイン名を入力</h3>
   <input v-model="userId" />
   <button @click="fetchUserInfo(userId)">取得</button>
-  <div>
+  <div v-if="status === 'loading'">
+    <p>読み込み中</p>
+  </div>
+  <div v-if="status === 'unknown'">
+    <p>アカウントは見つかりませんでした</p>
+  </div>
+  <div v-else>
     <h4>{{ userInfo.name }}</h4>
     <h4>{{ userInfo.login }}</h4>
     <img :src="userInfo.avatarUrl" :alt="userInfo.login" height="100">
